@@ -1,0 +1,100 @@
+pc = get_shell.host_computer
+
+C = {
+	"root": "C84252",
+	"user": "D8DEE9",
+	"pid": "4C566A",
+	"pname": "FFFFFF",
+	
+	"load_low": "A3BE8C",
+	"load_normal": "EBCB8B",
+	"load_high": "BF616A",
+	
+	"header": "FROMUSER CPU% MEM% PROCID PROCNAME",
+}
+// /home/user/Config/gtop.cfg
+// root=SOME_COLOR_IN_HEX
+// user=SOME_COLOR_IN_HEX
+// header=HEADER_TEXT
+
+cfg = pc.File("/home/" + active_user + "/Config/gtop.cfg")
+if cfg != null then
+	cfg = cfg.get_content.split("\n")
+	for line in cfg
+		line = line.split("=")
+		
+		if line.len != 2 then continue end if
+		if C.hasIndex(line[0]) then
+			C[line[0]] = line[1]
+		end if
+	end for
+end if
+
+getLoad = function(perc) // requires ##.#%
+	P = perc[:-1].replace("\.", "").to_int / 10
+	R = {"low": [0, 25], "normal": [25, 75], "high": [75, 100]}
+	for key in R.indexes
+		R1 = R[key][0]
+		R2 = R[key][1]
+		if P >= R1 and P <= R2 then L = key end if
+	end for
+	return L
+end function
+
+fetchData = function()
+	nd = {}
+	
+	procs = pc.show_procs.split("\n")[1:]
+	
+	for procData in procs
+		procData = procData.split(" ")
+		
+		user = procData[0]
+		pid = procData[1]
+		cpuLoad = procData[2]
+		memLoad = procData[3]
+		procName = procData[4]
+		
+		nd[procName] = [user, cpuLoad, memLoad, pid]
+	end for
+
+	return nd
+end function
+
+data = {}
+
+while true
+	fd = fetchData()
+	
+	if data != fd then
+		data = fd
+		clear_screen
+		
+		aOut = []
+		
+		for procName in data.indexes
+			procData = data[procName]
+			
+			user = procData[0]
+			cpuLoad = procData[1]
+			memLoad = procData[2]
+			pid = procData[3]
+			
+			userColor = C.user
+			if user == "root" then
+				userColor = C.root
+			end if
+			pidF = "<color=#" + C.pid + ">" + pid + "</color>"
+		
+			out = []
+			out.push("<color=#" + userColor + ">" + user + "</color>")
+			out.push("<color=#" + C["load_" + getLoad(cpuLoad)] + ">" + cpuLoad + "</color>")
+			out.push("<color=#" + C["load_" + getLoad(memLoad)] + ">" + memLoad + "</color>")
+			out.push(pidF)
+			out.push("<color=#" + C.pname + ">" + procName)
+			aOut.push(out.join(" "))
+		end for
+		
+		print(C.header + "\n" + format_columns(aOut.join("\n")) + "\n")
+	end if
+end while
