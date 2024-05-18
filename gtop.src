@@ -55,7 +55,7 @@ fetchData = function()
 		memLoad = procData[3]
 		procName = procData[4]
 		
-		nd[procName] = [user, cpuLoad, memLoad, pid]
+		nd[pid] = [user, cpuLoad, memLoad, procName]
 	end for
 
 	return nd
@@ -72,19 +72,19 @@ while true
 		
 		aOut = []
 		
-		for procName in data.indexes
-			procData = data[procName]
+		for procId in data.indexes
+			procData = data[procId]
 			
 			user = procData[0]
 			cpuLoad = procData[1]
 			memLoad = procData[2]
-			pid = procData[3]
+			procName = procData[3]
 			
 			userColor = C.user
 			if user == "root" then
 				userColor = C.root
 			end if
-			pidF = "<color=#" + C.pid + ">" + pid + "</color>"
+			pidF = "<color=#" + C.pid + ">" + procId + "</color>"
 		
 			out = []
 			out.push("<color=#" + userColor + ">" + user + "</color>")
