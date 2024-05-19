@@ -23,7 +23,10 @@ if cfg != null then
 	for line in cfg
 		line = line.split("=")
 		
-		if line.len != 2 then continue end if
+		if line.len != 2 then
+			continue
+		end if
+
 		if C.hasIndex(line[0]) then
 			C[line[0]] = line[1]
 		end if
@@ -36,7 +39,9 @@ getLoad = function(perc) // requires ##.#%
 	for key in R.indexes
 		R1 = R[key][0]
 		R2 = R[key][1]
-		if P >= R1 and P <= R2 then L = key end if
+		if P >= R1 and P <= R2 then
+			L = key
+		end if
 	end for
 	return L
 end function
